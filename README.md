@@ -1,5 +1,15 @@
 # Task Scheduler System
 
+[![Último commit](https://img.shields.io/github/last-commit/theusazevedd/Task-Scheduler-System?logo=github&logoColor=white&label=último%20commit)](https://github.com/theusazevedd/Task-Scheduler-System/commits/main)
+[![Java](https://img.shields.io/badge/Java-17-ED8B00?logo=openjdk&logoColor=white)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
+
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![JWT](https://img.shields.io/badge/auth-JWT-000000?logo=jsonwebtokens&logoColor=white)](https://jwt.io/)
+[![OpenFeign](https://img.shields.io/badge/OpenFeign-HTTP-6DB33F?logo=spring&logoColor=white)](https://spring.io/projects/spring-cloud-openfeign)
+
 Sistema de agendamento de tarefas em arquitetura de microserviços, com **Spring Boot**, comunicação **OpenFeign**, autenticação **JWT** e orquestração **Docker Compose**.
 
 > Repositório de visão geral do ecossistema. Os códigos dos microserviços ficam nos repositórios listados abaixo; use o `docker-compose.yml` da raiz quando as quatro pastas de serviço estiverem presentes.
