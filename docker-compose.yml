@@ -1,0 +1,95 @@
+# Orquestração local do ecossistema. Requisitos: pastas irmãs com Dockerfile em cada serviço
+# (task-bff, user-service, task-scheduler-service, notification-service), na raiz deste repositório.
+#
+# Uso: copie .env.example para .env, clone os microserviços nas pastas indicadas no README e execute:
+#   docker compose up --build
+#
+# Ajuste variáveis e healthchecks conforme os Dockerfiles reais de cada projeto.
+
+name: task-scheduler-system
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tss-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-users_db}
+      POSTGRES_USER: ${DB_USER:-admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-admin} -d ${POSTGRES_DB:-users_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mongodb:
+    image: mongo:7
+    container_name: tss-mongodb
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "localhost/test", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: tss-user-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-users_db}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-admin}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-admin}
+    ports:
+      - "8080:8080"
+
+  task-scheduler-service:
+    build:
+      context: ./task-scheduler-service
+      dockerfile: Dockerfile
+    container_name: tss-task-scheduler
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/${MONGO_DATABASE:-tasks}
+    ports:
+      - "8081:8081"
+
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: tss-notification
+    environment:
+      SPRING_MAIL_USERNAME: ${EMAIL_USERNAME:-}
+      SPRING_MAIL_PASSWORD: ${EMAIL_PASSWORD:-}
+    ports:
+      - "8082:8082"
+
+  task-bff:
+    build:
+      context: ./task-bff
+      dockerfile: Dockerfile
+    container_name: tss-task-bff
+    depends_on:
+      - user-service
+      - task-scheduler-service
+      - notification-service
+    ports:
+      - "8083:8083"
+
+volumes:
+  postgres_data:
+  mongo_data:
